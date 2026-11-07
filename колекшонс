@@ -1,0 +1,444 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public static class SwapHelper
+{
+    public static void Swap<T>(ref T first, ref T second)
+    {
+        T temporary = first;
+        first = second;
+        second = temporary;
+    }
+}
+
+public class CustomStack<T>
+{
+    private readonly List<T> _items = new();
+
+    public int Count => _items.Count;
+
+    public void Push(T item)
+    {
+        _items.Add(item);
+    }
+
+    public T Pop()
+    {
+        if (Count == 0)
+            throw new InvalidOperationException("Стек порожній.");
+
+        int lastIndex = _items.Count - 1;
+        T item = _items[lastIndex];
+        _items.RemoveAt(lastIndex);
+        return item;
+    }
+
+    public T Peek()
+    {
+        if (Count == 0)
+            throw new InvalidOperationException("Стек порожній.");
+
+        return _items[_items.Count - 1];
+    }
+}
+
+public abstract class MarineCreature
+{
+    public string Name { get; }
+    public int Age { get; }
+
+    protected MarineCreature(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public abstract string GetInfo();
+}
+
+public class Dolphin : MarineCreature
+{
+    public double LengthMeters { get; }
+
+    public Dolphin(string name, int age, double lengthMeters)
+        : base(name, age)
+    {
+        LengthMeters = lengthMeters;
+    }
+
+    public override string GetInfo() =>
+        $"Дельфін: {Name}, вік: {Age}, довжина: {LengthMeters} м";
+}
+
+public class Shark : MarineCreature
+{
+    public string Species { get; }
+
+    public Shark(string name, int age, string species)
+        : base(name, age)
+    {
+        Species = species;
+    }
+
+    public override string GetInfo() =>
+        $"Акула: {Name}, вік: {Age}, вид: {Species}";
+}
+
+public class SeaTurtle : MarineCreature
+{
+    public string ShellColor { get; }
+
+    public SeaTurtle(string name, int age, string shellColor)
+        : base(name, age)
+    {
+        ShellColor = shellColor;
+    }
+
+    public override string GetInfo() =>
+        $"Морська черепаха: {Name}, вік: {Age}, колір панцира: {ShellColor}";
+}
+
+public class Aquarium : IEnumerable<MarineCreature>
+{
+    private readonly List<MarineCreature> _creatures = new();
+
+    public int Count => _creatures.Count;
+
+    public void Add(MarineCreature creature)
+    {
+        _creatures.Add(creature);
+    }
+
+    public IEnumerator<MarineCreature> GetEnumerator()
+    {
+        return _creatures.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
+
+public class EmployeeManager
+{
+    private readonly Dictionary<string, string> _employees =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    public bool Add(string login, string password)
+    {
+        if (_employees.ContainsKey(login))
+            return false;
+
+        _employees.Add(login, password);
+        return true;
+    }
+
+    public bool Remove(string login)
+    {
+        return _employees.Remove(login);
+    }
+
+    public bool Change(string oldLogin, string newLogin, string newPassword)
+    {
+        if (!_employees.ContainsKey(oldLogin))
+            return false;
+
+        if (!oldLogin.Equals(newLogin, StringComparison.OrdinalIgnoreCase)
+            && _employees.ContainsKey(newLogin))
+        {
+            return false;
+        }
+
+        _employees.Remove(oldLogin);
+        _employees.Add(newLogin, newPassword);
+        return true;
+    }
+
+    public bool TryGetPassword(string login, out string password)
+    {
+        return _employees.TryGetValue(login, out password!);
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        while (true)
+        {
+            Console.WriteLine("\nВиберіть завдання від 1 до 4 в моїй роботі Collections");
+            Console.WriteLine("1. Обмін значень (Swap)");
+            Console.WriteLine("2. Робота зі стеком");
+            Console.WriteLine("3. Океанаріум");
+            Console.WriteLine("4. Менеджер співробітників");
+            Console.WriteLine("0. Вихід");
+
+            string choice = ReadRequired("Ваш вибір: ");
+
+            switch (choice)
+            {
+                case "1":
+                    RunSwap();
+                    break;
+                case "2":
+                    RunStack();
+                    break;
+                case "3":
+                    RunAquarium();
+                    break;
+                case "4":
+                    RunEmployeeManager();
+                    break;
+                case "0":
+                    return;
+                default:
+                    Console.WriteLine("Невідома команда.");
+                    break;
+            }
+        }
+    }
+
+    private static void RunSwap()
+    {
+        Console.WriteLine("\nSwap");
+        string first = ReadRequired("Перше значення: ");
+        string second = ReadRequired("Друге значення: ");
+
+        SwapHelper.Swap(ref first, ref second);
+
+        Console.WriteLine($"Після обміну: перше = {first}, друге = {second}");
+    }
+
+    private static void RunStack()
+    {
+        var stack = new CustomStack<string>();
+
+        while (true)
+        {
+            Console.WriteLine("\nСтек");
+            Console.WriteLine("1. Push — додати елемент");
+            Console.WriteLine("2. Pop — забрати верхній елемент");
+            Console.WriteLine("3. Peek — переглянути верхній елемент");
+            Console.WriteLine("4. Count — кількість елементів");
+            Console.WriteLine("0. Назад");
+
+            string choice = ReadRequired("Ваш вибір: ");
+
+            try
+            {
+                switch (choice)
+                {
+                    case "1":
+                        stack.Push(ReadRequired("Введіть значення: "));
+                        Console.WriteLine("Елемент додано.");
+                        break;
+                    case "2":
+                        Console.WriteLine($"Забрано: {stack.Pop()}");
+                        break;
+                    case "3":
+                        Console.WriteLine($"На вершині: {stack.Peek()}");
+                        break;
+                    case "4":
+                        Console.WriteLine($"Кількість елементів: {stack.Count}");
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        Console.WriteLine("Невідома команда.");
+                        break;
+                }
+            }
+            catch (InvalidOperationException exception)
+            {
+                Console.WriteLine(exception.Message);
+            }
+        }
+    }
+
+    private static void RunAquarium()
+    {
+        var aquarium = new Aquarium();
+
+        while (true)
+        {
+            Console.WriteLine("\nОкеанаріум");
+            Console.WriteLine("1. Додати мешканця");
+            Console.WriteLine("2. Показати всіх мешканців");
+            Console.WriteLine("0. Назад");
+
+            string choice = ReadRequired("Ваш вибір: ");
+
+            switch (choice)
+            {
+                case "1":
+                    AddCreature(aquarium);
+                    break;
+                case "2":
+                    if (aquarium.Count == 0)
+                    {
+                        Console.WriteLine("В океанаріумі поки немає мешканців.");
+                        break;
+                    }
+
+                    foreach (MarineCreature creature in aquarium)
+                        Console.WriteLine(creature.GetInfo());
+
+                    break;
+                case "0":
+                    return;
+                default:
+                    Console.WriteLine("Невідома команда.");
+                    break;
+            }
+        }
+    }
+
+    private static void AddCreature(Aquarium aquarium)
+    {
+        Console.WriteLine("1. Дельфін");
+        Console.WriteLine("2. Акула");
+        Console.WriteLine("3. Морська черепаха");
+
+        string type = ReadRequired("Оберіть вид: ");
+        string name = ReadRequired("Ім'я мешканця: ");
+        int age = ReadInt("Вік: ");
+
+        switch (type)
+        {
+            case "1":
+                double length = ReadDouble("Довжина в метрах: ");
+                aquarium.Add(new Dolphin(name, age, length));
+                break;
+            case "2":
+                string species = ReadRequired("Вид акули: ");
+                aquarium.Add(new Shark(name, age, species));
+                break;
+            case "3":
+                string color = ReadRequired("Колір панцира: ");
+                aquarium.Add(new SeaTurtle(name, age, color));
+                break;
+            default:
+                Console.WriteLine("Невідомий вид. Мешканця не додано.");
+                return;
+        }
+
+        Console.WriteLine("Мешканця додано.");
+    }
+
+
+
+
+
+    private static void RunEmployeeManager()
+    {
+        var manager = new EmployeeManager();
+
+        while (true)
+        {
+            Console.WriteLine("\nМенеджер співробітників");
+            Console.WriteLine("1. Додати логін і пароль");
+            Console.WriteLine("2. Видалити співробітника");
+            Console.WriteLine("3. Змінити логін і пароль");
+            Console.WriteLine("4. Знайти пароль за логіном");
+            Console.WriteLine("0. Назад");
+
+            string choice = ReadRequired("Ваш вибір: ");
+
+            switch (choice)
+            {
+                case "1":
+                    {
+                        string login = ReadRequired("Логін: ");
+                        string password = ReadRequired("Пароль: ");
+
+                        Console.WriteLine(
+                            manager.Add(login, password)
+                                ? "Співробітника додано."
+                                : "Такий логін уже існує.");
+                        break;
+                    }
+                case "2":
+                    {
+                        string login = ReadRequired("Логін для видалення: ");
+
+                        Console.WriteLine(
+                            manager.Remove(login)
+                                ? "Співробітника видалено."
+                                : "Логін не знайдено.");
+                        break;
+                    }
+                case "3":
+                    {
+                        string oldLogin = ReadRequired("Поточний логін: ");
+                        string newLogin = ReadRequired("Новий логін: ");
+                        string newPassword = ReadRequired("Новий пароль: ");
+
+                        Console.WriteLine(
+                            manager.Change(oldLogin, newLogin, newPassword)
+                                ? "Дані співробітника змінено."
+                                : "Не вдалося змінити дані: перевірте логін або новий логін.");
+                        break;
+                    }
+                case "4":
+                    {
+                        string login = ReadRequired("Логін: ");
+
+                        if (manager.TryGetPassword(login, out string password))
+                            Console.WriteLine($"Пароль: {password}");
+                        else
+                            Console.WriteLine("Логін не знайдено.");
+
+                        break;
+                    }
+                case "0":
+                    return;
+                default:
+                    Console.WriteLine("Невідома команда.");
+                    break;
+            }
+        }
+    }
+
+    private static string ReadRequired(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string? value = Console.ReadLine();
+
+            if (!string.IsNullOrWhiteSpace(value))
+                return value.Trim();
+
+            Console.WriteLine("Поле не може бути порожнім.");
+        }
+    }
+
+    private static int ReadInt(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+
+            if (int.TryParse(Console.ReadLine(), out int value) && value >= 0)
+                return value;
+
+            Console.WriteLine("Введіть ціле невід'ємне число.");
+        }
+    }
+
+    private static double ReadDouble(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string? input = Console.ReadLine();
+
+            if (double.TryParse(input, out double value) && value > 0)
+                return value;
+
+            Console.WriteLine("Введіть додатне число.");
+        }
+    }
+}
